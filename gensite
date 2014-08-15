@@ -1,0 +1,93 @@
+#!/usr/bin/sh
+outdir="${1:-_site}"
+
+function replace_tag
+{
+  awk -v key="$2" "{sub(/{{$1}}/,key)}1"
+}
+
+function format_date
+{
+  echo "$1" | \
+    awk 'BEGIN {
+          FS="-"
+          months["01"] = "January"
+          months["02"] = "February"
+          months["03"] = "March"
+          months["04"] = "April"
+          months["05"] = "May"
+          months["06"] = "June"
+          months["07"] = "July"
+          months["08"] = "August"
+          months["09"] = "September"
+          months["10"] = "October"
+          months["11"] = "November"
+          months["12"] = "December"
+        }
+        {
+          printf "%s %s %s", $3, months[$2], $1
+        }'
+}
+
+#setup dirs
+if [ -a "$outdir" ]; then
+  rm -r "$outdir"
+fi
+mkdir -p "$outdir"
+mkdir -p "$outdir"/css
+cp -r img "$outdir"/img
+for file in $(ls css); do
+  cat css/"$file" | ./cssminifier > "$outdir"/css/"$file"
+done
+mkdir -p "$outdir"/post
+
+matchdate=[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]::
+
+#generate posts
+template="$(mktemp)"
+postlist="$(mktemp)"
+cat layout/base.html | replace_tag content "$(cat layout/post.html)" \
+  > "$template"
+for post in $(ls post); do
+  src="post/$post"
+  htmldest="/post/${post#$matchdate}"
+  dest="$outdir/$htmldest"
+  title="$(head -n1 $src)"
+  toptitle="$title | Raphael Santos"
+  rawdate="${post%%::*.html}"
+  fmtdate="$(format_date $rawdate)"
+  echo "$rawdate::$title::$fmtdate::$htmldest" >> "$postlist"
+  cat "$template" | replace_tag content "$(tail -n+3 $src)" | \
+    replace_tag toptitle "$toptitle" | replace_tag title "$title" | \
+    replace_tag date "$fmtdate" | ./htmlminifier > "$dest"
+done
+
+#generate pages
+cat layout/base.html | replace_tag content "$(cat layout/page.html)" \
+  > "$template"
+for page in $(ls page); do
+  src="page/$page"
+  dest="$outdir/$page"
+  if [ "$page" = 'index.html' ]; then
+    cat layout/base.html | replace_tag content "$(cat $src)" | \
+      replace_tag toptitle 'Raphael Santos' | replace_tag posts \
+      "$(head -n5 "$postlist" | sort -r | awk -f indexpostlist.awk)" | \
+      ./htmlminifier > "$dest"
+  elif [ "$page" = 'archive.html' ]; then
+    title="$(head -n1 $src)"
+    toptitle="$title | Raphael Santos"
+    cat "$template" | replace_tag content "$(tail -n+3 $src)" | \
+      replace_tag toptitle "$toptitle" | replace_tag title "$title" | \
+      replace_tag posts \
+      "$(cat "$postlist" | sort -r | awk -f archivepostlist.awk)" | \
+      ./htmlminifier > "$dest"
+  else
+    title="$(head -n1 $src)"
+    toptitle="$title | Raphael Santos"
+    cat "$template" | replace_tag content "$(tail -n+3 $src)" | \
+      replace_tag toptitle "$toptitle" | replace_tag title "$title" | \
+      ./htmlminifier > "$dest"
+  fi
+done
+
+zip -r "$outdir" "$outdir"/*

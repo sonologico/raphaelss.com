@@ -1,0 +1,105 @@
+body {
+  background: #fff;
+  font: 14px/21px Verdana, Arial, sans-serif;
+  color: #444;
+}
+
+.container {
+  width: 750px;
+  margin: 0 auto;
+  padding: 0;
+  padding-top: 30px;
+}
+
+.column-left {
+  float: left;
+  width: 60%;
+  margin: 0;
+  padding: 0;
+}
+
+.column-right{
+  float: right;
+  width: 40%;
+  margin: 0;
+  padding: 0;
+}
+
+.header-line {
+  clear: both;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 50px;
+  border-bottom: 1px solid #ccc;
+}
+
+.main-title {
+  float: left;
+  text-decoration: none;
+}
+
+.main-title a {
+  text-decoration: none;
+}
+
+nav {
+  width: 60%;
+  float: right;
+  margin: 0;
+  padding: 0;
+  padding-top: 35px;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav li {
+  float: right;
+}
+
+nav li a {
+  padding: 12px;
+}
+
+a {
+  color: #181818;
+}
+
+a:visited {
+  color: #181818;
+}
+
+a:hover {
+  color: #c00;
+
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #181818;
+  font-weight: normal;
+}
+
+.page-title {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 25px;
+}
+
+ul.data-list {
+  margin: 0;
+  margin-top: 25px;
+  padding: 0;
+  list-style: none;
+}
+
+ul.data-list li {
+  padding-bottom: 20px;
+}
+
+.date {
+  color: #888;
+}
